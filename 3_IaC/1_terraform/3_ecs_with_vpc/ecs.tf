@@ -1,7 +1,3 @@
-provider "aws" {
-  region="ap-south-1"
-}
-
 variable server_port {
   type    = number
   default = 8080
@@ -21,11 +17,12 @@ resource "aws_instance" "example" {
   ami           = "ami-08ee6644906ff4d6c"
   instance_type = "t3.micro"
   vpc_security_group_ids = [aws_security_group.instance.id]
+  subnet_id = "${aws_subnet.public_1a.id}"
   key_name = "mykey"
   user_data = <<-EOF
         #!/bin/bash
         echo 'hello world' > index.html
-        nohup busybox httpd -f -p ${var.server_port} & 
+        nohup busybox httpd -f -p ${var.server_port} &
         EOF
    tags =  {
      Name = "terraform-example"
@@ -34,6 +31,7 @@ resource "aws_instance" "example" {
 
 resource "aws_security_group" "instance" {
   name = "terraform-example-instance"
+  vpc_id = "${aws_vpc.main.id}"
   ingress {
     from_port   = var.server_port
     to_port     = var.server_port
