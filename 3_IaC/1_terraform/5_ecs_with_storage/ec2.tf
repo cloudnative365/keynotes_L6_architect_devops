@@ -19,7 +19,7 @@ resource "aws_instance" "example" {
   key_name = "mykey"
   associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.instance.id]
-  subnet_id = "${aws_subnet.public_1a.id}"
+  subnet_id = "${aws_subnet.public.id}"
   user_data = <<-EOF
         #!/bin/bash
         echo 'hello world' > index.html
@@ -32,7 +32,7 @@ resource "aws_instance" "example" {
 
 resource "aws_security_group" "instance" {
   name = "terraform-example-instance"
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = "${aws_vpc.main-vpc.id}"
   ingress {
     from_port   = var.server_port
     to_port     = var.server_port
@@ -44,6 +44,13 @@ resource "aws_security_group" "instance" {
     to_port     = var.ssh_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 }
 
